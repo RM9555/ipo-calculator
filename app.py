@@ -6,24 +6,20 @@ from collections import Counter
 # Caching the factorial calculation for better performance
 @st.cache_data
 def calculate_combinations(n: int, r: int) -> float:
+    """Calculate nCr combinations"""
     return math.factorial(n) / (math.factorial(r) * math.factorial(n - r))
 
-@st.cache_data
-@st.cache_data
+@st.cache_data(ttl=0)  # Added ttl=0 to prevent caching issues
 def calculate_probability(n: int, x: int, p: float) -> float:
-    """Calculate probability of getting at least x successes in n trials
-    Using 1 minus P(less than x) approach which is more efficient and accurate
     """
-    if x == 0:
-        return 1.0
-    
-    # Calculate P(X < x) = P(0) + P(1) + ... + P(x-1)
+    Calculate probability of getting AT LEAST x successes in n trials
+    P(at least x) = P(x) + P(x+1) + ... + P(n)
+    """
+    # P(at least x) = 1 - P(less than x)
     prob_less_than_x = 0
     for i in range(0, x):
-        prob = calculate_combinations(n, i) * (p ** i) * ((1 - p) ** (n - i))
-        prob_less_than_x += prob
-    
-    # P(X >= x) = 1 - P(X < x)
+        prob_i = calculate_combinations(n, i) * (p ** i) * ((1 - p) ** (n - i))
+        prob_less_than_x += prob_i
     return 1 - prob_less_than_x
 
 def parse_application_input(input_str: str) -> List[str]:
@@ -102,7 +98,7 @@ def main():
                     else:
                         st.write(f"\n{category.upper()} (Subscription ratio: {effective_subscription:.2f}x)")
                     
-                    p = 1 / effective_subscription
+                    p = 1 / effective_subscription  # Probability of getting a lot
                     
                     for i in range(1, count + 1):
                         prob = calculate_probability(count, i, p) * 100
