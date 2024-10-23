@@ -9,13 +9,22 @@ def calculate_combinations(n: int, r: int) -> float:
     return math.factorial(n) / (math.factorial(r) * math.factorial(n - r))
 
 @st.cache_data
+@st.cache_data
 def calculate_probability(n: int, x: int, p: float) -> float:
-    """Calculate probability of getting at least x successes in n trials"""
-    total_prob = 0
-    for i in range(x, n + 1):
+    """Calculate probability of getting at least x successes in n trials
+    Using 1 minus P(less than x) approach which is more efficient and accurate
+    """
+    if x == 0:
+        return 1.0
+    
+    # Calculate P(X < x) = P(0) + P(1) + ... + P(x-1)
+    prob_less_than_x = 0
+    for i in range(0, x):
         prob = calculate_combinations(n, i) * (p ** i) * ((1 - p) ** (n - i))
-        total_prob += prob
-    return total_prob
+        prob_less_than_x += prob
+    
+    # P(X >= x) = 1 - P(X < x)
+    return 1 - prob_less_than_x
 
 def parse_application_input(input_str: str) -> List[str]:
     """Parse input string into list of categories"""
