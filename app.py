@@ -22,6 +22,22 @@ def calculate_probability(n: int, x: int, p: float) -> float:
         prob_less_than_x += prob_i
     return 1 - prob_less_than_x
 
+def calculate_expected_lots(n: int, p: float, category: str) -> float:
+    """
+    Calculate expected number of lots based on category
+    """
+    # Calculate basic expectation (n * p)
+    basic_expectation = n * p
+    
+    # Multiply by lots per application based on category
+    lots_multiplier = {
+        'retail': 1,
+        'shni': 14,
+        'bhni': 14
+    }
+    
+    return basic_expectation * lots_multiplier[category]
+
 def parse_application_input(input_str: str) -> List[str]:
     """Parse input string into list of categories"""
     if not input_str:
@@ -52,9 +68,9 @@ def main():
     
     st.markdown("""
     ### Available categories:
-    1. retail - Retail Individual Investor
-    2. shni  - Small HNI
-    3. bhni  - Big HNI
+    1. retail - Retail Individual Investor (1 lot per application)
+    2. shni  - Small HNI (14 lots per application)
+    3. bhni  - Big HNI (14 lots per application)
     """)
     
     # Input field for applications
@@ -90,6 +106,8 @@ def main():
                 st.subheader("Probability Calculations:")
                 st.markdown("---")
                 
+                total_expected_lots = 0
+                
                 for category, count in category_counts.items():
                     effective_subscription = subscription_ratios[category]
                     if category == 'bhni':
@@ -100,11 +118,20 @@ def main():
                     
                     p = 1 / effective_subscription  # Probability of getting a lot
                     
+                    # Calculate and display probability for each number of lots
                     for i in range(1, count + 1):
                         prob = calculate_probability(count, i, p) * 100
                         st.write(f"Probability of getting at least {i} lot(s): {prob:.2f}%")
                     
+                    # Calculate and display expected lots
+                    expected_lots = calculate_expected_lots(count, p, category)
+                    total_expected_lots += expected_lots
+                    st.write(f"Expected number of lots: {expected_lots:.2f}")
+                    
                     st.markdown("---")
+                
+                st.subheader("Total Expected Lots")
+                st.write(f"Total expected number of lots across all categories: {total_expected_lots:.2f}")
                     
     except ValueError as e:
         st.error(f"Error: {e}")
