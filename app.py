@@ -22,21 +22,22 @@ def calculate_probability(n: int, x: int, p: float) -> float:
         prob_less_than_x += prob_i
     return 1 - prob_less_than_x
 
-def calculate_expected_lots(n: int, p: float, category: str) -> float:
+def calculate_expected_lots(n: int, p: float, category: str) -> int:
     """
     Calculate expected number of lots based on category
+    Returns integer for retail and multiple of 14 for HNI categories
     """
     # Calculate basic expectation (n * p)
     basic_expectation = n * p
     
-    # Multiply by lots per application based on category
-    lots_multiplier = {
-        'retail': 1,
-        'shni': 14,
-        'bhni': 14
-    }
-    
-    return basic_expectation * lots_multiplier[category]
+    if category == 'retail':
+        # Round to nearest integer for retail
+        return round(basic_expectation)
+    else:
+        # For SHNI and BHNI, round to nearest multiple of 14
+        lots_per_application = 14
+        applications = round(basic_expectation)  # Round the number of successful applications
+        return applications * lots_per_application
 
 def parse_application_input(input_str: str) -> List[str]:
     """Parse input string into list of categories"""
@@ -126,12 +127,16 @@ def main():
                     # Calculate and display expected lots
                     expected_lots = calculate_expected_lots(count, p, category)
                     total_expected_lots += expected_lots
-                    st.write(f"Expected number of lots: {expected_lots:.2f}")
+                    
+                    if category in ['shni', 'bhni']:
+                        st.write(f"Expected number of lots: {expected_lots} (multiple of 14)")
+                    else:
+                        st.write(f"Expected number of lots: {expected_lots}")
                     
                     st.markdown("---")
                 
                 st.subheader("Total Expected Lots")
-                st.write(f"Total expected number of lots across all categories: {total_expected_lots:.2f}")
+                st.write(f"Total expected number of lots across all categories: {total_expected_lots}")
                     
     except ValueError as e:
         st.error(f"Error: {e}")
